@@ -69,8 +69,14 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      const updatedCart = cart.filter(cart => cart.id !== productId);
+      const updatedCart = [...cart];
+      const productIndex = updatedCart.findIndex(product => product.id === productId);
+
+      if(productIndex < 0){
+        throw Error();
+      }
       
+      updatedCart.splice(productIndex, 1);
       setCart(updatedCart);
       localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
     } catch {
@@ -86,7 +92,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const stock = await api.get(`/stock/${productId}`);
       const stockAmount = stock.data.amount;
 
-      if (amount > stockAmount){
+      if (amount > stockAmount || amount <= 0){
         toast.error('Quantidade solicitada fora de estoque');
         return;
       }
